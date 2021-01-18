@@ -506,3 +506,142 @@ end
 if @supplier.account.nil?
   @msg = "NO ACCOUNT"
 end
+
+class Author < ApplicationRecord
+  has_many :books
+end
+
+author.books / author.books < < obj / author.books.delete(obj)
+author.books.destroy(obj) / author.books = (objs) / author.book_ids
+author.book_ids = (ids) / author.books.clear / author.books.empty?
+author.books.size / author.books.find() / author.books.where()
+author.books.build(params) / author.books.build(params) /
+author.books.create(params) / author.books.create!(params) /
+author.books.reload
+
+@books = @author.books
+@author.books << @book1
+@author.books.delete(@book1)
+@author.books.destroy(@book1)
+@book_ids = @author.book_ids
+@author.books.clear
+<% if @author.books.empty? %>
+  NO BOOKS
+<% end %>
+@book_count = @author.books.size
+@available_book = @author.books.find(1)
+@available_books = @author.books.where(available: true)
+@available_book = @available_book.first
+
+@book = @author.books.build(published_at: Time.now, book_number: "12345")
+@books = @author.books.bulid([{ published_at: Time.now, book_number: "A123456" }, { published_at: Time.now, book_numer: "B123456" }])
+@book = @author.books.create(published_at: Time.now, book_number: "A12345")
+@books = @author.books.create([
+  {published_at: Time.now, book_number: "A123456" },
+  { published_at: Time.now, book_numner: "B123456" }
+])
+@books = @author.books.reload
+
+class Author < ApplicationRecord
+  has_many :books, dependent: :delete_all, :validate: false
+end
+
+class Author < ApplicationRecord
+  has_many :books, class_name: "Transaction", inverse_of: :author
+end
+class Book < ApplicationRecord
+  belongs_to :author, inverse_of: :books
+end
+
+class Author < ApplicationRecord
+  has_many :books, foreign_key: "cust_id", primary_key: :guid
+end
+
+class Author < ApplicationRecord
+  has_many :books, ->(){ where processed: true }
+  has_many :paperbacks, through: :books, source: :format, source_type: "Paperback"
+end
+
+class Book < ApplicationRecord
+  has_one :format, polymorphic: true
+end
+class HardBack < ApplicationRecord; end
+class PaperBack < ApplicationRecord; end
+
+class Author < ApplicationRecord
+  has_many :confirmed_books, ->(){ where "confirmed=1", confirmed: 1 }, class_name: "Book"
+  has_many :chapters, ->(){ group "books.id" }, through: :books 
+  has_many :books, ->(){ includes(:chapters).order("date_confirmed DESC") }
+  has_many :recent_books, ->(){ order("published_at desc").offset(100).limit(100)}, class_name: "Book"
+end
+class Book < ApplicationRecord
+  belongs_to :author
+  has_many :chapters
+end
+class Chapter < ApplicationRecord
+  belongs_to :book
+end
+
+class Person < ApplicationRecord
+  has_many :readings
+  has_many :articles, ->(){ distinct } through: :readings
+end
+
+person = Person.create(name: "John")
+article = Article.create(name: "a1")
+person.articles << article
+person.articles << article
+person.artiles.inspect
+Reading.all.inspect
+
+add_index :readings, [:person_id, :article_id], unique: true
+person = Person.create(name: "Honda")
+article = Article.create(name: "a1")
+person.articles << article
+person.article << article
+
+class User < ApplicationRecord
+  has_and_belongs_to_many :friends, class_name: "User", foreign_key: "This_user_id", associate_foreign_key: "other_usre_id"
+end
+
+before_add / after_add / before_remove / after_remove /
+class Author < ApplicationRecord
+  has_many :books, before_add :check_credit_limit, after_add: [:check_credit_limit, :calculate_shipping_charges]
+
+  def check_credit_limit(book)
+  end
+
+  def calculate_shipping_charges(book)
+  end
+end
+
+author.books << book
+author.books << [book, book2]
+book.update(author_id: 1)
+
+class Author < ApplicationRecord
+  has_many :books do 
+    def find_by_book_prefix(book_number)
+      find_by(category_id: book_number[0..2])
+    end
+  end
+end
+
+module FindRecentExtension
+  def find_recent
+    where("category_at > ?", 5.days.ago)
+  end
+end
+
+class Author < ApplicationRecord
+  has_many :books, ->(){ extending FindRecentExtension }
+end
+rails g model vehicle type:string color:string price:decimal{10,2}
+
+rails g model car --parent=Vehicle
+class Car < Vehicle
+end
+Car.create(color: "RED", price: 10000)
+INSERT INTO "vehicles" ("type", "color", "price") VALUES ("Car", "Red", 10000)
+Car.all
+SELECT "vehicles".* FROM "vehicles" WHERE "vehicles"."type" IN ["Car"]
