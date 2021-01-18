@@ -184,3 +184,325 @@ class CreateAssemliesAndParts < ActiveRecord::Migration[5.0]
     end
   end
 end
+
+class Supplier < ApplicaitonRecord
+  has_one :account
+end
+
+class Account < ApplicationRecord
+  belongs_to :supplier
+end
+
+class CreateSuppliers < ActiveRecord::Migration[5.0]
+  def change
+    create_table :suppliers do |t|
+      t.string :name
+      t.timestamps
+    end
+    create_table :account do |t|
+      t.bigint :supplier_id
+      t.string :account_number
+      t.timestamps
+    end
+    add_index :account, :supplier_id
+  end
+end
+
+class Assembly < ApplicationRecord
+  has_and_belongs_to_many :parts
+end
+
+class Part < ApplicationRecord
+  has_ane_belongs_to_many :assembly
+end
+
+class Assembly < ApplicatoinRecord
+  has_many :manifests
+  has_many :parts, through: :manifests
+end
+
+class Manifest < ApplicationRecord
+  belongs_to :assembly
+  belongs_to :part
+end
+
+class Part < ApplicationRecord
+  has_many :manifests
+  has_many :assemblies, through: :manifests
+end
+
+class Picture < ApplicatoinRecord
+  belongs_to :imageable, polymorphic: :true
+end
+
+class Employee < ApplicationRecord
+  has_many :pictures, as: :imageable
+end
+
+class Produc < ApplicationRecord
+  has_many :pictures, as: :imageable
+end
+
+class CreatePictures < ActiveRecord::Migration[5.0]
+  def change
+    create_table :pictures do |t|
+      t.string :name
+      t.bigint :imageable_id
+      t.string :imageable_type
+      t.timestamps
+    end
+    add_index :pictures, [:imageable_type, :imageale_id]
+  end
+end
+
+class CreatePictures < ActiveRecord::Migration[5.0]
+  def change
+    create_table :pictures do |t|
+      t.string :name
+      t.references :imageable, polymorphic: true
+      t.timestamps
+    end
+  end
+end
+
+class Employee < ApplicationRecord
+  has_many :subbordinates, class_name: "Employee", foreign_key: "manager_id"
+  belongs_to :manager, class_name: "Employee", optional: true
+end
+
+class CreateEmployee < ActiveRecord::Migration[5.0]
+  def change
+    create_table :employees do |t|
+      t.references :manager
+    end
+  end
+end
+
+author.books
+author.books.size
+author.books.empty?
+
+author.books
+author.books.size
+author.books.reload.empty?
+
+class Book < ApplicationRecord
+  belongs_to :author
+end
+
+class CreateBook < ActiveRecord::Migration[5.0]
+  def change
+    create_table :books do |t|
+      t.datetime :published_at
+      t.string :book_number
+      t.references :author
+    end
+  end
+end
+
+class AddAuthorToBook < ActiveRecord::Migration[5.0]
+  def change
+    add_reference :books, :author
+  end
+end
+
+class Assembly < ApplicationRecord
+  has_and_belongs_to_many :parts
+end
+
+class Part < ApplicationRecord
+  has_and_belongs_to_many :assemblies
+end
+
+class CreateAssembliesPartsJoinTable < ActiveRecord::Migration[5.0]
+  def change
+    create_table :assembies_parts, id: false do |t|
+      t.bigint :assembly_id
+      t.bigint :part_id
+    end
+    add_index :assemblies_parts, :assembly_id
+    add_index :assemblies_parts, :part_id
+  end
+
+  def change
+    create_join_table :assemblies, :parts do |t|
+      t.index :assembly_id
+      t.index :part_id
+    end
+  end
+end
+
+module MyApplication
+  module Business
+    class Supplier < ApplicationRecord
+      has_one :account
+    end
+
+    class Account < ApplicationRecord
+      belongs_to :suppliers
+    end
+  end
+end
+
+module MyApplication
+  module Business
+    class Supplier < ApplicatoinRecord
+      has_one :account, class_name: "MyApplication::Billing::Acount"
+    end
+  end
+
+  module Billing
+    class Account < ApplicationRecord
+      belongs_to :supplier, class_name: "MyApplicatoin::Business::Supplier"
+    end
+  end
+end
+
+class Author < ApplicationRecord
+  has_many :books
+end
+
+class Book < ApplicationRecord
+  belongs_to :author
+end
+
+a = Auhtor.first
+b = a.books.first
+a.first_name == b.author.first_name
+a.first_name = "David"
+a.first_name == b.author.first_name
+
+class Author < ApplicationRecord
+  has_many :books, inverse_of: "writer"
+end
+
+class Book < ApplicationRecord
+  belongs_to :writer, class_name: "Author", foreign_key: "author_id"
+end
+
+a = Author.first
+b = a.books.first
+a.first_name == b.writer.first_name
+a.first_name = "David"
+a.first_name == b.writer.first_name
+
+class Book < ApplicationRecord
+  belongs_to :author
+end
+
+book.author / book.author = / build_author / create_author /
+create_author! / reload_author
+
+@author = @book.author
+@author = @book.reload_author
+@book.author = @author
+@author = @book.build_author(author_number: 123, author_name: "John")
+@author = @book.create_author(author_number: 123, author_name: "John")
+
+class Book < ApplicationRecord
+  belongs_to :author, touch: :books_updated_at, counter_cache: true
+end
+
+:autosave, :class_name, :counter_cache, :dependent, :foreign_key,
+:primary_key, :inverse_of, :touch, :polymorphic, :validate, :optional
+
+class Book < ApplicationRecord
+  belongs_to :author, class_name: "Patron", foreign_key: "patron_id"
+end
+
+class Book < ApplicationRecord
+  belongs_to :author, counter_cache: true, counter_cache: :count_of_books
+end
+
+class Author < ApplicationRecord
+  has_many :books
+end
+
+class User < ApplicationRecord
+  self.primary_key = "guid"
+end
+
+class ToDo < ApplicationRecord
+  belongs_to :user, primary_key: "guid"
+end
+
+class Author < ApplicationRecord
+  has_many :books, inverse_of: :author
+end
+class Book < ApplicationRecord
+  belongs_to :author, inverse_of: :books, touch: true, books_updated_at, ->(){ where active: true }
+end
+
+class Chapter < ApplicationRecord
+  belongs_to :book, ->(){ includes :author }
+end
+class Book < ApplicationRecord
+  belongs_to :author
+  has_many :hcapters
+end
+class Author < ApplicationRecord
+  has_many : books
+end
+
+if @book.author.nil?
+  @msg = "NO AUTHOR"
+end
+
+class Supplier < ApplicationRecord
+  has_one :account
+end
+
+@account = @supplier.account
+@account = @supplier.reload_account
+@supplier.account = @account
+
+@account = @supplier.build_account(terms: "Ne 30")
+@account = @supplier.create_account(terms: "Ne 30")
+
+class Supplier < ApplicationRecord 
+  has_one :account, class_name: "Billing", dependent: :nullify
+end
+
+class Supplier < ApplicationRecord
+  has_one :account, foreign_key: "supp_id", inverse_of: :supplier
+end
+
+class Account < ApplicationRecord
+  belongs_to :supplier, foreign_key: "supp_id", inverse_of: :account
+end
+
+class Book < ApplicationRecord
+  has_one :format, polymorphic: true
+  has_one :dust_jacket, through: :format, source: :dust_jacket, source_type: "HardBack"
+end
+
+class PaperBack < ApplicationRecord; normalize_card_number
+
+class HardBack < ApplicationRecord
+  has_one :dust_jacket
+end
+
+class DustJacket < ApplicationRecord; end
+
+class Supplier < ApplicationRecord
+  has_one :account, touch: true, :suppliers_updated_at, ->(){ where active: true, "confirmed = 1"}
+end
+
+class Account < ApplicaitonRecord
+  belongs_to :supplier
+end
+
+class Supplier < ApplicationRecord
+  has_one :account, ->(){ includes :representative }
+end
+class Account < ApplicationRecord
+  belongs_to :supplier
+  belongs_to :representative
+end
+class Representative < ApplicationRecord
+  has_many :accounts
+end
+
+if @supplier.account.nil?
+  @msg = "NO ACCOUNT"
+end
