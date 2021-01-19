@@ -139,3 +139,123 @@ SELECT date(create_at) AS ordered_date, SUM(price) AS total_price
 FROM orders
 GROUP BY date(created_at)
 HAVING SUM(price) > 100
+
+Article.where("id > 10").limit(20).order("id asc").unscope(:order)
+SELECT * FROM articles WHERE articles.id > 10 LIMIT 20
+Article.where(id: 10, trashed: false).unscope(where: :id)
+SELECT articles.* FROM articles WHERE articles.trashed = 0
+Article.order("id asc").merge(Article.unscope(:order))
+SELECT "articles".* FROM articles
+
+Article.where("id > 10").limit(20).order("id desc").only(:order, :where)
+SELECT * FROM articles WHERE id > 10 ORDER BY id DESC
+
+class Article < ApplicationRecord
+  has_many :comments, ->(){ order("posted_at DESC") }
+end
+Article.find(10).comments.reorder("name")
+SELECT * FROM articles WHERE id = 10
+SELECT * FROM comments WHERE article_id = 10 ORDER BY name
+SELECT * FROM comments WHERE article_id = 10 ORDER BY posted_at DESC
+
+Client.where("orders_count > 10").order(:name).reverse_order
+SELECT * FROM clients WHERE orders_coutn > 10 ORDER BY name desc
+Client.where("orders_count > 10").reverse_order
+SELECT * FROM clients WHERE orders_count > 10 ORDER BY clients.id DESC
+
+Article.where(trashed: true).rewhere(trashed: false)
+SELECT * FROM articles WHERE trashed: false
+SELECT * FROM articles WHERE trashed = 1 AND trashed = 0
+
+
+Article.none
+@articles = current_user.visible_articles.where(name: params[:name])
+
+def visible_articles
+  case roles
+  when "Country Manager"
+    Article.where(country: country)
+  when "Reviewer"
+    Article.published_at
+  when "Bad User"
+    Article.none
+  end
+end
+
+client = Client.readonly.first
+client.visits += 1
+client.save
+
+c1 = Client.find(1)
+c2 = Client.find(2)
+c1.first_name = "Michael"
+c1.save
+c2.name = "Should fail"
+c2.save
+
+class Client < ApplicationRecord
+  self.locking_column = :lock_client_column
+end
+
+Item.transaction do
+  i = Item.lock.first
+  i.name = "Jones"
+  i.save!
+end
+
+BEGIN 
+SELECT * FROM items LIMIT 1 FOR update
+UPDATE items SET name = "Jones", "updated_at" = "2009-02-08 18:05:56" WHERE "id" = 1
+COMMIT
+
+Item.transaction do
+  i = Item.lock("LOCK IN SHARE MODE").find(1)
+  i.increment!(:views)
+end
+
+Author.joins("INNER JOIN posts ON posts.author_id = authors.id AND posts.published = 't'")
+SELECT * FROM authors INNER JOIN posts ON posts.author_id = authors.id AND posts.published = 't'
+
+class Category < ApplicationRecord
+  has_many :articles
+end
+class Article < ApplicationRecord
+  belongs_to :category_at
+  has_many :comments
+  has_many :tags
+end
+class Comment < ApplicationRecord
+  belongs_to :article
+  has_one :guest
+end
+class Guest < ApplicationRecord
+  belongs_to :comment
+end
+class Tag < ApplicationRecord
+  belongs_to :article
+end
+
+Category.joins(:articles).distinct
+SELECT categories.* FROM categories INNER JOIN articles ON articles.category_id = categories.id
+Article.joins(:category, :comment)
+SELECT articles.* FROM articles
+  INNER JOIN categories ON articles.category_id = categoreis.id
+  INNER JOIN comments ON comments.article_id = articles.id
+Article.joins(comments: :guest)
+SELECT articles.* FROM articles
+  INNER JOIN comments ON comments.article_id = articles.id
+  INNER JOIN guests ON guests.comment_id = comments.id
+Category.joins(articles: { comments: :guest }, :tags)
+SELECT categories.* FROM categories
+  INNER JOIN articles ON articles.category_id = categories.id
+  INNER JOIN comments ON comments.article_id = articles.id
+  INNER JOIN guests ON guests.comment_id = comments.id
+  INNER JOIN tags ON tags.article_id = articles.id
+
+time_range = (Time.now.midnight - 1.day)..(Time.now.midnight)
+Client.joins(:orders).where("orders_created_at"=> time_range)
+Client.joins(:orders).where(orders: { created_at: time_range })
+
+Author.left_outer_joins(:posts).distinct.select("authors.*, COUNT(posts.*) AS posts_count").group("authors.id")
+SELECT DISTINCT authors.*, COUNT(posts.*) AS posts_count FROM "authors"
+LEFT OUTER JOIN posts ON posts.author_id = authors.id GROUP BY authors.id
