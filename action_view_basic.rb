@@ -187,4 +187,102 @@ time_ago_in_time(3.minutes.from_now)
 
 my_hash = { "first" => 1, "second" => 2, "third" => [1, 2, 3] }
 debug(my_hash)
- 
+
+<%= check_box("article", "validated") %>
+<%= form_with model: @person do |f| %>
+  <% f.text_field :first_name %>
+  <%= f.text_field :last_name %>
+  <%= fields_for @person.permission do |pf| %>
+    <%= pf.check_box :admin %>
+  <% end %>
+<% end %>
+
+<%= file_field(:user, :avatar) %>
+<%= hidden_field(:user, :token) %>
+<%= label(:article, :title) %>
+<%= password_field(:login, :pass) %>
+<%= radio_button(:article, :category, :rails) %>
+<%= radio_button(:article, :category, :java) %>
+<%= text_area(:comment, :text, size: "20x30") %>
+<%= text_field(:article, :title) %>
+<%= email_field(:user, :email) %>
+<%= url_field(:user, :url) %>
+
+def name_with_initial
+    "#{ first_name.first}. #{ last_name}"
+end
+
+collectoin_select(:article, :author_id, Author.all, :id, :name_with_initial, { prompt: true }) %>
+collection_radio_button(:article, :author_id, Author.all, :id, :name_with_initial) %>
+collection_check_boxes(:article, :author_ids, Author.all, :id, :name_with_initial) %>
+option_groups_from_collection_for_select(@continents, :countries, :name, :id, :name, 3) %>
+options_for_select(["VISA", "MasterCard"])
+options_from_collection_for_select(@project.people, :id, :name) 
+select(:article, :person_id, Person.all.collect { |p| [p.name, p.id ]}, { include_blank: true })
+time_zone_select(:user, :time_zone)
+date_field(:user, :dob)
+
+check_box_tag "accept"
+field_set_tag
+<%= field_set_tag do  %>
+  <p><%= text_field_tag :name %></p>
+<% end %>
+
+<%= form_tag({ action: "post", controller: "main" }, multipart: true) do %>
+  <label for="file">File to Upload</label><%= file_field_tag :file %>
+  <%= submit_tag %>
+<% end %>
+
+<%= form_tag "/articles" do %>
+  <div><%= submit_tag "Save" %></div>
+<% end %>
+
+<%= hidden_field_tag(:token, "ASDJjpdhgqu") %>
+image_submit_tag("login.png")
+label_tag :name
+password_field_tag :pass
+radio_button_tag("favorite_color", "maroon")
+select_tag("people", "<option>David</option>")
+submit_tag "Show this article"
+text_area_tag "article"
+text_field_tag "name"
+email_field_tag "email"
+url_field_tag "url"
+date_field_tag "dob"
+
+<%= button_to_function "Greeting", "alert('Hello world')" %>
+<%= button_to_functin "Delete", "if(confirm('Really?')) do_delete()" %>
+<%= button_to_function "Details" do |page| %>
+  <% page[:details].visual_effect :toggle_slide %>
+<% end %>
+
+javascript_tag "alert("ALL OK")"
+
+<%= number_to_currency(1232346) %>
+<%= number_to_human_size(12345) %>
+<%= number_to_human_size(1324325436) %>
+
+<%= numner_to_percentage(100, precision: 0) %>
+<%= number_to_phone(123456789) %>
+<%= number_with_delimter(2343406) %>
+<%= number_with_precision(122.3456) %>
+<%= number_with_precision(111.23456, prcision: 2) %>
+
+<%= sanitize @article.body %>
+sanitize(@article.body, tags: %w(table tr td), attributes: %w(id class style))
+
+class Application < Rails::Application
+  config.action_view.sanitized_allowed_tags = "tbale", "tr", "td"
+end
+
+strip_links("<a href='https:.....'>Ruby on Rails</a>")
+strip_links("To mail: <a href='http://sadphfw'>me@email.com</a>")
+<%= strip_links("Blog: <a href='hreajfjpjsf'>Open</a>") %>
+<%= strip_tags("<i>There</i>Tags will be stripped") %>
+<%= strip_tags("<b>No Bold</b><a href='more.html'>Details</a>")
+
+<%= csrf_meta_tags %>
+
+def self_expert_locale
+  I18n.locale = :expert if current_user.expert?
+end
